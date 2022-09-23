@@ -8,8 +8,8 @@ const cache = require("../cache");
 const listenHotkeys = () => {
 	keypress(process.stdin);
 
-	process.stdin.on("keypress", function (ch, key) {
-		if (key && key.ctrl && key.name == "c") {
+	process.stdin.on("keypress", function (_ch, key) {
+		if (key && key.ctrl && key.name === "c") {
 			cache.ui.allowClear = false;
 			// eslint-disable-next-line no-undef
 			if (global.botInterval) clearInterval(botInterval);

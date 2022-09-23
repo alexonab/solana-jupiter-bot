@@ -5,6 +5,8 @@ const cache = {
 	queueThrottle: 1,
 	sideBuy: true,
 	iteration: 0,
+	performanceOfTxStart: 0,
+	performanceOfIteration: 0,
 	iterationPerMinute: {
 		start: performance.now(),
 		value: 0,
@@ -71,7 +73,7 @@ const cache = {
 	fetchingResultsFromSolscan: false,
 	fetchingResultsFromSolscanStart: 0,
 	tradeHistory: [],
-	performanceOfTxStart: 0,
+
 	availableRoutes: {
 		buy: 0,
 		sell: 0,
