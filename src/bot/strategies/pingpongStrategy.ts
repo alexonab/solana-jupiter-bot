@@ -1,21 +1,25 @@
-const JSBI = require("jsbi");
-const { PublicKey } = require("@solana/web3.js");
-const {
+// const JSBI = require("jsbi");
+// const { PublicKey } = require("@solana/web3.js");
+import JSBI from "jsbi";
+import { PublicKey } from "@solana/web3.js";
+
+import {
 	calculateProfit,
 	toDecimal,
 	updateIterationsPerMin,
 	checkRoutesResponse,
-} = require("../../utils");
-const cache = require("../cache");
-const { printToConsole } = require("../ui");
-const { swap, failedSwapHandler, successSwapHandler } = require("../swap");
-
-const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
+} from "../../utils";
+import { cache } from "../cache";
+import { printToConsole } from "../ui";
+import { swap, failedSwapHandler, successSwapHandler } from "../swap";
+// @ts-ignore
+export const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 	const performanceOfIterationStart = performance.now();
 	let performanceOfRouteComp = 0;
 	cache.iteration++;
 	const date = new Date();
 	const i = cache.iteration;
+	//@ts-ignore
 	cache.queue[i] = -1;
 
 	try {
@@ -57,6 +61,8 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 			routes.routesInfos.length;
 
 		// update status as OK
+		//@ts-ignore
+
 		cache.queue[i] = 0;
 
 		performanceOfRouteComp = performance.now() - performanceOfRouteCompStart;
@@ -102,6 +108,8 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 			!cache.swappingRightNow &&
 			(cache.hotkeys.e ||
 				cache.hotkeys.r ||
+				//@ts-ignore
+
 				simulatedProfit >= cache.config.minPercProfit)
 		) {
 			// hotkeys
@@ -149,7 +157,7 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 						});
 					}
 				}, 500);
-
+				// @ts-ignore
 				[tx, performanceOfTx] = await swap(jupiter, route);
 
 				// stop refreshing status
@@ -162,6 +170,7 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 
 				tradeEntry = {
 					...tradeEntry,
+					// @ts-ignore
 					outAmount: tx.outputAmount || 0,
 					profit,
 					performanceOfTx,
@@ -202,12 +211,15 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 			simulatedProfit,
 		});
 	} catch (error) {
+		//@ts-ignore
+
 		cache.queue[i] = 1;
 		console.log(error);
 	} finally {
 		cache.performanceOfIteration =
 			performance.now() - performanceOfIterationStart - performanceOfRouteComp;
+		//@ts-ignore
+
 		delete cache.queue[i];
 	}
 };
-exports.pingpongStrategy = pingpongStrategy;

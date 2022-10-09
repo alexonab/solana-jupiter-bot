@@ -1,9 +1,8 @@
-const fs = require("fs");
-const chalk = require("chalk");
+import fs from "fs";
+import chalk from "chalk";
 
-const cache = require("./cache");
-
-const logExit = (code = 0, error) => {
+// @ts-ignore
+export const logExit = (code = 0, error) => {
 	code === 0 && console.log(chalk.black.bgMagentaBright.bold(error.message));
 
 	if (code === 1) {
@@ -12,7 +11,7 @@ const logExit = (code = 0, error) => {
 				chalk.black.bgRedBright.black("ERROR: " + chalk.bold(error.message))
 			);
 		error?.stack && console.log(chalk.redBright(error.stack));
-
+		// @ts-ignore
 		if (cache.isSetupDone) {
 			console.log(
 				chalk.black.bgYellowBright(
@@ -25,7 +24,7 @@ const logExit = (code = 0, error) => {
 	}
 };
 
-const handleExit = () => {
+export const handleExit = () => {
 	try {
 		console.log(
 			chalk.black.bgMagentaBright(
@@ -35,6 +34,7 @@ const handleExit = () => {
 
 		// write cache to file
 		try {
+			// @ts-ignore
 			fs.writeFileSync("./temp/cache.json", JSON.stringify(cache, null, 2));
 			console.log(
 				chalk.black.bgGreenBright(
@@ -53,6 +53,7 @@ const handleExit = () => {
 		try {
 			fs.writeFileSync(
 				"./temp/tradeHistory.json",
+				// @ts-ignore
 				JSON.stringify(cache.tradeHistory, null, 2)
 			);
 			console.log(
@@ -74,5 +75,3 @@ const handleExit = () => {
 		console.log(error);
 	}
 };
-
-module.exports = { logExit, handleExit };

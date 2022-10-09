@@ -1,11 +1,21 @@
-const ui = require("cliui")({ width: 140 });
-const ch = require("chalk");
-const moment = require("moment");
-const chart = require("asciichart");
+// const ui = require("cliui")({ width: 140 });
+// @ts-ignore
+import cliui from "cliui";
+const ui = cliui({ width: 140 });
+// const ch = require("chalk");
+import ch from "chalk";
+
+// const moment = require("moment");
+import moment from "moment";
+// const chart = require("asciichart");
+// @ts-ignore
+import chart from "asciichart";
 
 const { toDecimal } = require("../../utils");
-const cache = require("../cache");
-const JSBI = require("jsbi");
+// const cache = require("../cache");
+import { cache } from "../cache";
+// const JSBI = require("jsbi");
+import JSBI from "jsbi";
 
 const formatStatusMessage = () => {
 	let statusMessage = " ";
@@ -34,31 +44,33 @@ const formatStatusMessage = () => {
 
 	return statusMessage;
 };
-
+// @ts-ignore
 const formatInputAmount = (route, inputToken) => {
 	return `IN:  ${ch.yellowBright(
 		toDecimal(JSBI.toNumber(route.inAmount), inputToken.decimals)
+		//@ts-ignore
 	)} ${ch[cache.ui.defaultColor](inputToken.symbol)}`;
 };
-
+// @ts-ignore
 const formatOutAmount = (simulatedProfit, route, outputToken) => {
 	return `OUT: ${ch[simulatedProfit > 0 ? "greenBright" : "red"](
 		toDecimal(JSBI.toNumber(route.outAmount), outputToken.decimals)
+		//@ts-ignore
 	)} ${ch[cache.ui.defaultColor](outputToken.symbol)}`;
 };
-
+// @ts-ignore
 const formatSimulatedProfit = (simulatedProfit) => {
 	return `PROFIT: ${ch[simulatedProfit > 0 ? "greenBright" : "red"](
 		simulatedProfit.toFixed(2)
 	)} % ${ch.gray(`(${cache?.config?.minPercProfit})`)}`;
 };
-
+// @ts-ignore
 const formatMinOutAmount = (route, outputToken) => {
 	return `MIN. OUT: ${ch.magentaBright(
 		toDecimal(JSBI.toNumber(route.otherAmountThreshold), outputToken.decimals)
 	)}`;
 };
-
+// @ts-ignore
 const formatPerformance = (performanceOfRouteComp, minimal = false) => {
 	const performanceOfRouteCompColor =
 		performanceOfRouteComp < 1000 ? cache.ui.defaultColor : "redBright";
@@ -66,23 +78,33 @@ const formatPerformance = (performanceOfRouteComp, minimal = false) => {
 	const performanceOfIteration = ch.grey(
 		`+${cache.performanceOfIteration.toFixed()} ms`
 	);
+	//@ts-ignore
 
 	return `${minimal ? "L" : "LOOKUP (ROUTE)"}: ${ch.bold[
 		performanceOfRouteCompColor
 	](performanceOfRouteComp.toFixed())} ms ${performanceOfIteration}`;
 };
 
-function printToConsole({
+export const printToConsole = ({
+	// @ts-ignore
 	date,
+	// @ts-ignore
 	i,
+	// @ts-ignore
 	performanceOfRouteComp,
+	// @ts-ignore
 	inputToken,
+	// @ts-ignore
 	outputToken,
+	// @ts-ignore
 	tokenA,
+	// @ts-ignore
 	tokenB,
+	// @ts-ignore
 	route,
+	// @ts-ignore
 	simulatedProfit,
-}) {
+}): void => {
 	try {
 		// check swap / fetch result status
 		let statusMessage = formatStatusMessage();
@@ -95,8 +117,11 @@ function printToConsole({
 				log +=
 					`I: ${
 						i % 2 === 0
-							? ch[cache.ui.defaultColor].bold(i)
-							: ch[cache.ui.defaultColor](i)
+							? //@ts-ignore
+							  ch[cache.ui.defaultColor].bold(i)
+							: //@ts-ignore
+							  ch[cache.ui.defaultColor](i)
+						//@ts-ignore
 					} | ${ch.bold[cache.ui.defaultColor](
 						cache.iterationPerMinute.value
 					)} i/min` + divider;
@@ -162,6 +187,7 @@ function printToConsole({
 
 				ui.div(
 					{
+						//@ts-ignore
 						text: `TIMESTAMP: ${ch[cache.ui.defaultColor](
 							date.toLocaleString()
 						)}`,
@@ -169,13 +195,17 @@ function printToConsole({
 					{
 						text: `I: ${
 							i % 2 === 0
-								? ch[cache.ui.defaultColor].bold(i)
-								: ch[cache.ui.defaultColor](i)
+								? //@ts-ignore
+								  ch[cache.ui.defaultColor].bold(i)
+								: //@ts-ignore
+								  ch[cache.ui.defaultColor](i)
+							//@ts-ignore
 						} | ${ch.bold[cache.ui.defaultColor](
 							cache.iterationPerMinute.value
 						)} i/min`,
 					},
 					{
+						//@ts-ignore
 						text: `RPC: ${ch[cache.ui.defaultColor](
 							cache.ui.hideRpc
 								? `${cache.config.rpc[0].slice(
@@ -189,6 +219,7 @@ function printToConsole({
 
 				ui.div(
 					{
+						//@ts-ignore
 						text: `STARTED: ${ch[cache.ui.defaultColor](
 							moment(cache.startTime).fromNow()
 						)}`,
@@ -197,10 +228,13 @@ function printToConsole({
 						text: formatPerformance(performanceOfRouteComp),
 					},
 					{
+						//@ts-ignore
 						text: `MIN INTERVAL: ${ch[cache.ui.defaultColor](
 							cache.config.minInterval
+							//@ts-ignore
 						)} ms QUEUE: ${ch[cache.ui.defaultColor](
 							Object.keys(cache.queue).length
+							//@ts-ignore
 						)}/${ch[cache.ui.defaultColor](cache.queueThrottle)}`,
 					}
 				);
@@ -210,6 +244,7 @@ function printToConsole({
 					" ",
 					Object.values(cache.queue)
 						.map(
+							// @ts-ignore
 							(v) => `${ch[v === 0 ? "green" : v < 0 ? "yellow" : "red"]("●")}`
 						)
 						.join(" ")
@@ -231,14 +266,17 @@ function printToConsole({
 						cache.tradingEnabled
 							? "TRADING"
 							: ch.bold.magentaBright("SIMULATION")
+						//@ts-ignore
 					}: ${ch.bold[cache.ui.defaultColor](inputToken.symbol)} ${
 						cache.config.tradingStrategy === "arbitrage"
 							? ""
-							: `-> ${ch.bold[cache.ui.defaultColor](outputToken.symbol)}`
+							: //@ts-ignore
+							  `-> ${ch.bold[cache.ui.defaultColor](outputToken.symbol)}`
 					}`,
 					`ROUTES: ${ch.bold.yellowBright(
 						cache.availableRoutes[cache.sideBuy ? "buy" : "sell"]
 					)}`,
+					//@ts-ignore
 					`STRATEGY: ${ch.bold[cache.ui.defaultColor](
 						cache.config.tradingStrategy
 					)}`,
@@ -315,6 +353,7 @@ function printToConsole({
 						text: formatMinOutAmount(route, outputToken),
 					},
 					{
+						//@ts-ignore
 						text: `W/UNWRAP SOL: ${ch[cache.ui.defaultColor](
 							cache.wrapUnwrapSOL ? "on" : "off"
 						)}`,
@@ -355,14 +394,17 @@ function printToConsole({
 				ui.div(
 					`${ch[cache.currentBalance.tokenA > 0 ? "yellowBright" : "gray"](
 						toDecimal(cache.currentBalance.tokenA, tokenA.decimals)
+						//@ts-ignore
 					)} ${ch[cache.ui.defaultColor](tokenA.symbol)}`,
 
 					`${ch[cache.lastBalance.tokenA > 0 ? "yellowBright" : "gray"](
 						toDecimal(cache.lastBalance.tokenA, tokenA.decimals)
+						//@ts-ignore
 					)} ${ch[cache.ui.defaultColor](tokenA.symbol)}`,
 
 					`${ch[cache.initialBalance.tokenA > 0 ? "yellowBright" : "gray"](
 						toDecimal(cache.initialBalance.tokenA, tokenA.decimals)
+						//@ts-ignore
 					)} ${ch[cache.ui.defaultColor](tokenA.symbol)}`,
 
 					`${ch[cache.currentProfit.tokenA > 0 ? "greenBright" : "redBright"](
@@ -372,20 +414,22 @@ function printToConsole({
 				);
 
 				const here = 0;
-				console.log("🚀 ~ file: printToConsole.js ~ line 375 ~ here", here);
 				// const test = (cache?.currentBalance?.tokenB);
 
 				ui.div(
 					`${ch[cache.currentBalance.tokenB > 0 ? "yellowBright" : "gray"](
 						toDecimal(cache.currentBalance.tokenB, tokenB.decimals)
+						//@ts-ignore
 					)} ${ch[cache.ui.defaultColor](tokenB.symbol)}`,
 
 					`${ch[cache.lastBalance.tokenB > 0 ? "yellowBright" : "gray"](
 						toDecimal(cache.lastBalance.tokenB, tokenB.decimals)
+						//@ts-ignore
 					)} ${ch[cache.ui.defaultColor](tokenB.symbol)}`,
 
 					`${ch[cache.initialBalance.tokenB > 0 ? "yellowBright" : "gray"](
 						toDecimal(cache.initialBalance.tokenB, tokenB.decimals)
+						//@ts-ignore
 					)} ${ch[cache.ui.defaultColor](tokenB.symbol)}`,
 
 					`${ch[cache.currentProfit.tokenB > 0 ? "greenBright" : "redBright"](
@@ -411,11 +455,13 @@ function printToConsole({
 
 				ui.div(
 					{
+						//@ts-ignore
 						text: `MAX (BUY): ${ch[cache.ui.defaultColor](
 							cache.maxProfitSpotted.buy.toFixed(2)
 						)} %`,
 					},
 					{
+						//@ts-ignore
 						text: `MAX (SELL): ${ch[cache.ui.defaultColor](
 							cache.maxProfitSpotted.sell.toFixed(2)
 						)} %`,
@@ -445,35 +491,45 @@ function printToConsole({
 						const tableData = [...cache.tradeHistory].slice(-5);
 						tableData.map((entry) =>
 							ui.div(
+								//@ts-ignore
 								{ text: `${entry.date}`, border: true },
+								//@ts-ignore
 								{ text: `${entry.buy ? "BUY" : "SELL"}`, border: true },
+								//@ts-ignore
 								{ text: `${entry.inAmount} ${entry.inputToken}`, border: true },
 								{
+									//@ts-ignore
 									text: `${entry.outAmount} ${entry.outputToken}`,
 									border: true,
 								},
 								{
 									text: `${
 										ch[
+											//@ts-ignore
 											entry.profit > 0
 												? "greenBright"
-												: entry.profit < 0
+												: //@ts-ignore
+												entry.profit < 0
 												? "redBright"
 												: "cyanBright"
+											//@ts-ignore
 										](isNaN(entry.profit) ? "0" : entry.profit.toFixed(2)) +
 										" %"
 									}`,
 									border: true,
 								},
 								{
+									//@ts-ignore
 									text: `${entry.expectedOutAmount} ${entry.outputToken}`,
 									border: true,
 								},
 								{
+									//@ts-ignore
 									text: `${entry.expectedProfit.toFixed(2)} %`,
 									border: true,
 								},
 								{
+									//@ts-ignore
 									text: `${entry.error ? ch.bold.redBright(entry.error) : "-"}`,
 									border: true,
 								}
@@ -490,6 +546,4 @@ function printToConsole({
 	} catch (error) {
 		console.log(error);
 	}
-}
-
-module.exports = printToConsole;
+};

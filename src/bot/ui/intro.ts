@@ -1,9 +1,20 @@
-const ui = require("cliui")({ width: 140 });
-const chalk = require("chalk");
-const gradient = require("gradient-string");
+// const ui = require("cliui")({ width: 140 });
+// @ts-ignore
+import cliui from "cliui";
+const ui = cliui({ width: 140 });
+// const chalk = require("chalk");
+import chalk from "chalk";
+// const gradient = require("gradient-string");
+// @ts-ignore
+import gradient from "gradient-string";
 
-const package = require("../../../package.json");
-const { DISCORD_INVITE_URL } = require("../../constants");
+// @ts-ignore
+// const package = require("../../../package.json");
+const version = "0.1.0.beta";
+// const { DISCORD_INVITE_URL } = require("../../constants");
+//@ts-ignore
+
+import { DISCORD_INVITE_URL } from "../../constants";
 
 const universeSize = 15;
 const color = "white";
@@ -20,7 +31,7 @@ let colorsSet = [
 
 const random = (h = 100, l = 1) => Math.floor(Math.random() * (h - l + 1)) + l;
 
-async function intro() {
+export const intro = async () => {
 	try {
 		const skipIntro = process.env.SKIP_INTRO === "true" || false;
 
@@ -29,7 +40,7 @@ async function intro() {
 			for (let i = 0; i < 200; i++) {
 				const speed = i > 50 ? 100 - i : i;
 				const a = colorsSet.shift();
-				colorsSet.push(a);
+				colorsSet.push(a as string);
 				const g = gradient(colorsSet);
 
 				const char =
@@ -52,7 +63,8 @@ async function intro() {
 
 				ui.div(
 					{
-						text: g(`ARB SOLANA BOT - ${package.version}`),
+						// @ts-ignore
+						text: g(`ARB SOLANA BOT - ${version}`),
 						width: 50,
 						align: "center",
 						padding: [1, 0, 1, 0],
@@ -82,6 +94,4 @@ async function intro() {
 	} catch (error) {
 		console.log(error);
 	}
-}
-
-module.exports = intro;
+};

@@ -3,8 +3,10 @@ const promiseRetry = require("promise-retry");
 
 const { logExit, handleExit } = require("../bot/exit");
 const { storeItInTempAsJSON } = require("../utils");
-const cache = require("../bot/cache");
+// const cache = require("../bot/cache");
+import { cache } from "../bot/cache";
 
+//@ts-ignore
 const getSwapResultFromSolscanParser = async (txid) => {
 	try {
 		// disable trading till swap result is ready
@@ -13,6 +15,7 @@ const getSwapResultFromSolscanParser = async (txid) => {
 		cache.fetchingResultsFromSolscan = true;
 		cache.fetchingResultsFromSolscanStart = performance.now();
 
+		//@ts-ignore
 		const fetcher = async (retry) => {
 			const response = await axios.get(`https://api.solscan.io/transaction`, {
 				params: {
@@ -48,15 +51,18 @@ const getSwapResultFromSolscanParser = async (txid) => {
 		const mainActions = data.mainActions;
 
 		let [inputAmount, outputAmount] = [-1, -1];
+		//@ts-ignore
 		mainActions.filter((action) => {
 			const events = action?.data?.event;
 			if (events) {
 				const inputEvent = events.find(
+					//@ts-ignore
 					(event) =>
 						event?.sourceOwner === ownerAddress &&
 						event?.tokenAddress === tokenAddress
 				);
 				const outputEvent = events.find(
+					//@ts-ignore
 					(event) =>
 						event?.destinationOwner === ownerAddress &&
 						event?.tokenAddress === tokenAddress

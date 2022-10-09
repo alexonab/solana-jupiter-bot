@@ -1,16 +1,16 @@
 console.clear();
 
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-const { toNumber } = require("../utils");
-const { handleExit, logExit } = require("./exit");
-const cache = require("./cache");
-const { setup, getInitialOutAmountWithSlippage } = require("./setup");
-const { arbitrageStrategy } = require("./strategies/arbitrageStrategy");
-const { pingpongStrategy } = require("./strategies/pingpongStrategy");
-const JSBI = require("jsbi");
-
-const watcher = async (jupiter, tokenA, tokenB) => {
+import { toNumber } from "../utils";
+import { handleExit, logExit } from "./exit";
+import { cache } from "./cache";
+import { setup, getInitialOutAmountWithSlippage } from "./setup";
+import { arbitrageStrategy } from "./strategies/arbitrageStrategy";
+import { pingpongStrategy } from "./strategies/pingpongStrategy";
+import JSBI from "jsbi";
+const watcher = async (jupiter: any, tokenA: any, tokenB: any) => {
 	if (
 		!cache.swappingRightNow &&
 		Object.keys(cache.queue).length < cache.queueThrottle
@@ -19,6 +19,7 @@ const watcher = async (jupiter, tokenA, tokenB) => {
 			await pingpongStrategy(jupiter, tokenA, tokenB);
 		}
 		if (cache.config.tradingStrategy === "arbitrage") {
+			// @ts-ignore
 			await arbitrageStrategy(jupiter, tokenA, tokenB);
 		}
 	}
@@ -27,6 +28,7 @@ const watcher = async (jupiter, tokenA, tokenB) => {
 const run = async () => {
 	try {
 		// set everything up
+		// @ts-ignore
 		const { jupiter, tokenA, tokenB } = await setup();
 
 		if (cache.config.tradingStrategy === "pingpong") {
@@ -58,11 +60,13 @@ const run = async () => {
 			cache.lastBalance.tokenA = cache.initialBalance.tokenA;
 		}
 
+		// @ts-ignore
 		global.botInterval = setInterval(
 			() => watcher(jupiter, tokenA, tokenB),
 			cache.config.minInterval
 		);
 	} catch (error) {
+		// @ts-ignore
 		logExit(error);
 		process.exitCode = 1;
 	}

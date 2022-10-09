@@ -1,5 +1,34 @@
+export interface Config {
+	network: string;
+	rpc: string[];
+	tradingStrategy: string;
+	tokenA: Token;
+	tokenB: Token;
+	slippage: string;
+	minPercProfit: string;
+	minInterval: number;
+	tradeSize: TradeSize;
+	ui: UI;
+	storeFailedTxInHistory: boolean;
+}
+
+export interface Token {
+	symbol: string;
+	address: string;
+}
+
+export interface TradeSize {
+	value: number;
+	strategy: string;
+}
+
+export interface UI {
+	defaultColor: string;
+}
+
 // global cache
-const cache = {
+export const cache = {
+	config: <Config>{},
 	startTime: new Date(),
 	queue: {},
 	queueThrottle: 1,
@@ -81,5 +110,3 @@ const cache = {
 	},
 	isSetupDone: false,
 };
-
-module.exports = cache;

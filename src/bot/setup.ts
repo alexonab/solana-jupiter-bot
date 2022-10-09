@@ -1,17 +1,19 @@
-const fs = require("fs");
-const chalk = require("chalk");
-const JSBI = require("jsbi");
-const ora = require("ora-classic");
-const bs58 = require("bs58");
-const { Jupiter } = require("@jup-ag/core");
-const { Connection, Keypair, PublicKey } = require("@solana/web3.js");
+import fs from "fs";
+// @ts-ignore
+import cliui from "cliui";
+const ui = cliui({ width: 140 });
+import chalk from "chalk";
+import JSBI from "jsbi";
+import * as ora from "ora";
+import bs58 from "bs58";
+import { Jupiter } from "@jup-ag/core";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 
-const { logExit } = require("./exit");
-const { loadConfigFile } = require("../utils");
-const { intro, listenHotkeys } = require("./ui");
-const cache = require("./cache");
+import { loadConfigFile } from "../utils";
+import { intro, listenHotkeys } from "./ui";
+import { cache } from "./cache";
 
-const setup = async () => {
+export const setup = async () => {
 	let spinner, tokens, tokenA, tokenB, wallet;
 	try {
 		// listen for hotkeys
@@ -19,22 +21,32 @@ const setup = async () => {
 		await intro();
 
 		// load config file and store it in cache
+		// @ts-ignore
 		cache.config = loadConfigFile({ showSpinner: true });
 
-		spinner = ora({
-			text: "Loading tokens...",
-			discardStdin: false,
-			color: "magenta",
-		}).start();
+		spinner = ora
+			.default({
+				text: "Loading tokens...",
+				//@ts-ignore
+
+				discardStdin: false,
+				color: "magenta",
+			})
+			.start();
 
 		// read tokens.json file
 		try {
+			// @ts-ignore
 			tokens = JSON.parse(fs.readFileSync("./temp/tokens.json"));
 			// find tokens full Object
-			tokenA = tokens.find((t) => t.address === cache.config.tokenA.address);
+			tokenA = tokens.find(
+				(t: { address: any }) => t.address === cache.config.tokenA.address
+			);
 
 			if (cache.config.tradingStrategy !== "arbitrage")
-				tokenB = tokens.find((t) => t.address === cache.config.tokenB.address);
+				tokenB = tokens.find(
+					(t: { address: any }) => t.address === cache.config.tokenB.address
+				);
 		} catch (error) {
 			spinner.text = chalk.black.bgRedBright(
 				`\n	Loading tokens failed!\n	Please try to run the Wizard first using ${chalk.bold(
@@ -74,7 +86,7 @@ const setup = async () => {
 		spinner.text = "Loading Jupiter SDK...";
 
 		const jupiter = await Jupiter.load({
-			connection,
+			connection, // @ts-ignore
 			cluster: cache.config.network,
 			user: wallet,
 			restrictIntermediateTokens: true,
@@ -90,24 +102,37 @@ const setup = async () => {
 			spinner.fail(
 				chalk.bold.redBright(`Setting up failed!\n 	${spinner.text}`)
 			);
+		// @ts-ignore
 		logExit(1, error);
 		process.exitCode = 1;
 	}
 };
 
-const getInitialOutAmountWithSlippage = async (
-	jupiter,
-	inputToken,
-	outputToken,
-	amountToTrade
+export const getInitialOutAmountWithSlippage = async (
+	jupiter: {
+		computeRoutes: (arg0: {
+			inputMint: any;
+			outputMint: any;
+			amount: any;
+			slippageBps: number;
+			forceFeech: boolean;
+		}) => any;
+	},
+	inputToken: { address: any },
+	outputToken: { address: any },
+	amountToTrade: number
 ) => {
 	let spinner;
 	try {
-		spinner = ora({
-			text: "Computing routes...",
-			discardStdin: false,
-			color: "magenta",
-		}).start();
+		spinner = ora
+			.default({
+				text: "Computing routes...",
+				//@ts-ignore
+
+				discardStdin: false,
+				color: "magenta",
+			})
+			.start();
 
 		// compute routes for the first time
 		const routes = await jupiter.computeRoutes({
@@ -125,12 +150,8 @@ const getInitialOutAmountWithSlippage = async (
 	} catch (error) {
 		if (spinner)
 			spinner.fail(chalk.bold.redBright("Computing routes failed!\n"));
+		// @ts-ignore
 		logExit(1, error);
 		process.exitCode = 1;
 	}
-};
-
-module.exports = {
-	setup,
-	getInitialOutAmountWithSlippage,
 };

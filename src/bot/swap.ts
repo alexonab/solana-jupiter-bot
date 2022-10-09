@@ -1,10 +1,19 @@
 const { calculateProfit, toDecimal, storeItInTempAsJSON } = require("../utils");
-const cache = require("./cache");
+// const cache = require("./cache");
+import { cache } from "./cache";
 const { getSwapResultFromSolscanParser } = require("../services/solscan");
 
-const swap = async (jupiter, route) => {
+export const swap = async (
+	jupiter: {
+		exchange: (arg0: {
+			routeInfo: any;
+		}) => PromiseLike<{ execute: any }> | { execute: any };
+	},
+	route: any
+) => {
 	try {
 		const performanceOfTxStart = performance.now();
+
 		cache.performanceOfTxStart = performanceOfTxStart;
 
 		if (process.env.DEBUG) storeItInTempAsJSON("routeInfoBeforeSwap", route);
@@ -23,20 +32,42 @@ const swap = async (jupiter, route) => {
 		console.log("Swap error: ", error);
 	}
 };
-exports.swap = swap;
 
-const failedSwapHandler = (tradeEntry) => {
+export const failedSwapHandler = (tradeEntry: {
+	date: string;
+	buy: any;
+	inputToken: any;
+	outputToken: any;
+	inAmount: any;
+	expectedOutAmount: any;
+	expectedProfit: any;
+}) => {
 	// update counter
 	cache.tradeCounter[cache.sideBuy ? "buy" : "sell"].fail++;
 
 	// update trade history
 	let tempHistory = cache.tradeHistory;
+	// @ts-ignore
 	tempHistory.push(tradeEntry);
 	cache.tradeHistory = tempHistory;
 };
-exports.failedSwapHandler = failedSwapHandler;
 
-const successSwapHandler = async (tx, tradeEntry, tokenA, tokenB) => {
+export const successSwapHandler = async (
+	tx: { txid: any; outputAmount: any; inputAmount: any },
+	tradeEntry: {
+		date?: string;
+		buy?: any;
+		inputToken?: any;
+		outputToken?: any;
+		inAmount: any;
+		expectedOutAmount?: any;
+		expectedProfit?: any;
+		outAmount?: any;
+		profit?: any;
+	},
+	tokenA: { decimals: any },
+	tokenB: { decimals: any }
+) => {
 	if (process.env.DEBUG) storeItInTempAsJSON(`txResultFromSDK_${tx?.txid}`, tx);
 
 	// update counter
@@ -85,6 +116,7 @@ const successSwapHandler = async (tx, tradeEntry, tokenA, tokenB) => {
 			cache.lastBalance[cache.sideBuy ? "tokenB" : "tokenA"],
 			tx.outputAmount
 		);
+		// @ts-ignore
 		tempHistory.push(tradeEntry);
 		cache.tradeHistory = tempHistory;
 	}
@@ -125,8 +157,8 @@ const successSwapHandler = async (tx, tradeEntry, tokenA, tokenB) => {
 			cache.lastBalance["tokenA"],
 			outAmountFromSolscanParser
 		);
+		// @ts-ignore
 		tempHistory.push(tradeEntry);
 		cache.tradeHistory = tempHistory;
 	}
 };
-exports.successSwapHandler = successSwapHandler;

@@ -1,21 +1,24 @@
-const { PublicKey } = require("@solana/web3.js");
-const {
+import { PublicKey } from "@solana/web3.js";
+import {
 	calculateProfit,
 	toDecimal,
 	updateIterationsPerMin,
 	checkRoutesResponse,
-} = require("../../utils");
-const cache = require("../cache");
-const { printToConsole } = require("../ui");
-const { swap, failedSwapHandler, successSwapHandler } = require("../swap");
-const JSBI = require("jsbi");
+} from "../../utils";
+import { cache } from "../cache";
+import { printToConsole } from "../ui";
+import { swap, failedSwapHandler, successSwapHandler } from "../swap";
+import JSBI from "jsbi";
 
-const arbitrageStrategy = async (jupiter, tokenA) => {
+// @ts-ignore
+export const arbitrageStrategy = async (jupiter, tokenA) => {
 	const performanceOfIterationStart = performance.now();
 	let performanceOfRouteComp = 0;
 	cache.iteration++;
 	const date = new Date();
 	const i = cache.iteration;
+	//@ts-ignore
+
 	cache.queue[i] = -1;
 	try {
 		// calculate & update iterations per minute
@@ -47,6 +50,7 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 				slippageBps,
 				forceFetch: true,
 			})
+			// @ts-ignore
 			.catch((err) => {
 				console.log(err);
 			});
@@ -58,6 +62,7 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 			routes.routesInfos.length;
 
 		// update status as OK
+		//@ts-ignore
 		cache.queue[i] = 0;
 
 		performanceOfRouteComp = performance.now() - performanceOfRouteCompStart;
@@ -99,6 +104,7 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 			!cache.swappingRightNow &&
 			(cache.hotkeys.e ||
 				cache.hotkeys.r ||
+				//@ts-ignore
 				simulatedProfit >= cache.config.minPercProfit)
 		) {
 			// hotkeys
@@ -146,7 +152,7 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 						});
 					}
 				}, 500);
-
+				// @ts-ignore
 				[tx, performanceOfTx] = await swap(jupiter, route);
 
 				// stop refreshing status
@@ -159,6 +165,7 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 
 				tradeEntry = {
 					...tradeEntry,
+					// @ts-ignore
 					outAmount: tx.outputAmount || 0,
 					profit,
 					performanceOfTx,
@@ -195,13 +202,14 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 			simulatedProfit,
 		});
 	} catch (error) {
+		//@ts-ignore
 		cache.queue[i] = 1;
 		console.log("catched error", error);
 		throw error;
 	} finally {
 		cache.performanceOfIteration =
 			performance.now() - performanceOfIterationStart - performanceOfRouteComp;
+		//@ts-ignore
 		delete cache.queue[i];
 	}
 };
-exports.arbitrageStrategy = arbitrageStrategy;

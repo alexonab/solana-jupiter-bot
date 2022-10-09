@@ -1,18 +1,28 @@
-const chalk = require("chalk");
-const fs = require("fs");
-const ora = require("ora-classic");
-const { logExit } = require("../bot/exit");
+// const chalk = require("chalk");
+import chalk from "chalk";
+// const fs = require("fs");
+import fs from "fs";
+// const ora = require("ora-classic");
+// import ora from "ora";
+import * as ora from "ora";
+
+// const { logExit } = require("../bot/exit");
+import { logExit } from "../bot/exit";
 
 const createTempDir = () => !fs.existsSync("./temp") && fs.mkdirSync("./temp");
 
+// @ts-ignore
 const storeItInTempAsJSON = (filename, data) =>
 	fs.writeFileSync(`./temp/${filename}.json`, JSON.stringify(data, null, 2));
-
+// @ts-ignore
 const createConfigFile = (config) => {
-	const configSpinner = ora({
-		text: "Creating config...",
-		discardStdin: false,
-	}).start();
+	const configSpinner = ora
+		.default({
+			text: "Creating config...",
+			//@ts-ignore
+			discardStdin: false,
+		})
+		.start();
 
 	const configValues = {
 		network: config.network.value,
@@ -36,11 +46,13 @@ const createConfigFile = (config) => {
 	fs.writeFileSync("./config.json", JSON.stringify(configValues, null, 2), {});
 	configSpinner.succeed("Config created!");
 };
-
+// @ts-ignore
 const verifyConfig = (config) => {
 	let result = true;
+	// @ts-ignore
 	const badConfig = [];
 	Object.entries(config).forEach(([key, value]) => {
+		// @ts-ignore
 		const isSet = value.isSet;
 		const isSectionSet =
 			isSet instanceof Object
@@ -52,6 +64,7 @@ const verifyConfig = (config) => {
 			badConfig.push(key);
 		}
 	});
+	// @ts-ignore
 	return { result, badConfig };
 };
 
@@ -63,13 +76,17 @@ const loadConfigFile = ({ showSpinner = false }) => {
 	let config = {};
 	let spinner;
 	if (showSpinner) {
-		spinner = ora({
-			text: "Loading config...",
-			discardStdin: false,
-		}).start();
+		spinner = ora
+			.default({
+				text: "Loading config...",
+				//@ts-ignore
+				discardStdin: false,
+			})
+			.start();
 	}
 
 	if (fs.existsSync("./config.json")) {
+		// @ts-ignore
 		config = JSON.parse(fs.readFileSync("./config.json"));
 		spinner?.succeed("Config loaded!");
 		return config;
@@ -78,17 +95,19 @@ const loadConfigFile = ({ showSpinner = false }) => {
 	spinner?.fail(chalk.redBright("Loading config failed!\n"));
 	throw new Error("\nNo config.json file found!\n");
 };
-
+// @ts-ignore
 const calculateProfit = (oldVal, newVal) => ((newVal - oldVal) / oldVal) * 100;
-
+// @ts-ignore
 const toDecimal = (number, decimals) =>
+	// @ts-ignore
 	parseFloat(number / 10 ** decimals).toFixed(decimals);
-
+// @ts-ignore
 const toNumber = (number, decimals) => number * 10 ** decimals;
 
 /**
  * It calculates the number of iterations per minute and updates the cache.
  */
+// @ts-ignore
 const updateIterationsPerMin = (cache) => {
 	const iterationTimer =
 		(performance.now() - cache.iterationPerMinute.start) / 1000;
@@ -101,8 +120,9 @@ const updateIterationsPerMin = (cache) => {
 		cache.iterationPerMinute.counter = 0;
 	} else cache.iterationPerMinute.counter++;
 };
-
+// @ts-ignore
 const checkRoutesResponse = (routes) => {
+	// @ts-ignore
 	if (Object.hasOwn(routes, "routesInfos")) {
 		if (routes.routesInfos.length === 0) {
 			logExit(1, {
@@ -127,7 +147,21 @@ const checkForEnvFile = () => {
 	}
 };
 
-module.exports = {
+// module.exports = {
+// 	createTempDir,
+// 	storeItInTempAsJSON,
+// 	createConfigFile,
+// 	loadConfigFile,
+// 	verifyConfig,
+// 	calculateProfit,
+// 	toDecimal,
+// 	toNumber,
+// 	updateIterationsPerMin,
+// 	checkRoutesResponse,
+// 	checkForEnvFile,
+// };
+
+export {
 	createTempDir,
 	storeItInTempAsJSON,
 	createConfigFile,
