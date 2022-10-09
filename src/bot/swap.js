@@ -30,9 +30,6 @@ const failedSwapHandler = (tradeEntry) => {
 	cache.tradeCounter[cache.sideBuy ? "buy" : "sell"].fail++;
 
 	// update trade history
-	cache.config.storeFailedTxInHistory;
-
-	// update trade history
 	let tempHistory = cache.tradeHistory;
 	tempHistory.push(tradeEntry);
 	cache.tradeHistory = tempHistory;

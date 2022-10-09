@@ -8,6 +8,7 @@ const cache = require("./cache");
 const { setup, getInitialOutAmountWithSlippage } = require("./setup");
 const { arbitrageStrategy } = require("./strategies/arbitrageStrategy");
 const { pingpongStrategy } = require("./strategies/pingpongStrategy");
+const JSBI = require("jsbi");
 
 const watcher = async (jupiter, tokenA, tokenB) => {
 	if (
@@ -38,11 +39,13 @@ const run = async () => {
 			cache.lastBalance.tokenA = cache.initialBalance.tokenA;
 
 			// set initial & last balance for tokenB
-			cache.initialBalance.tokenB = await getInitialOutAmountWithSlippage(
-				jupiter,
-				tokenA,
-				tokenB,
-				cache.initialBalance.tokenA
+			cache.initialBalance.tokenB = JSBI.toNumber(
+				await getInitialOutAmountWithSlippage(
+					jupiter,
+					tokenA,
+					tokenB,
+					cache.initialBalance.tokenA
+				)
 			);
 			cache.lastBalance.tokenB = cache.initialBalance.tokenB;
 		} else if (cache.config.tradingStrategy === "arbitrage") {

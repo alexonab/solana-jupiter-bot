@@ -1,5 +1,6 @@
 const fs = require("fs");
 const chalk = require("chalk");
+const JSBI = require("jsbi");
 const ora = require("ora-classic");
 const bs58 = require("bs58");
 const { Jupiter } = require("@jup-ag/core");
@@ -112,7 +113,7 @@ const getInitialOutAmountWithSlippage = async (
 		const routes = await jupiter.computeRoutes({
 			inputMint: new PublicKey(inputToken.address),
 			outputMint: new PublicKey(outputToken.address),
-			inputAmount: amountToTrade,
+			amount: JSBI.BigInt(amountToTrade),
 			slippage: 0,
 			forceFeech: true,
 		});
@@ -120,7 +121,7 @@ const getInitialOutAmountWithSlippage = async (
 		if (routes?.routesInfos?.length > 0) spinner.succeed("Routes computed!");
 		else spinner.fail("No routes found. Something is wrong!");
 
-		return routes.routesInfos[0].outAmountWithSlippage;
+		return routes.routesInfos[0].otherAmountThreshold;
 	} catch (error) {
 		if (spinner)
 			spinner.fail(chalk.bold.redBright("Computing routes failed!\n"));

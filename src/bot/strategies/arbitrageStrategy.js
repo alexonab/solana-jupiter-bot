@@ -8,6 +8,7 @@ const {
 const cache = require("../cache");
 const { printToConsole } = require("../ui");
 const { swap, failedSwapHandler, successSwapHandler } = require("../swap");
+const JSBI = require("jsbi");
 
 const arbitrageStrategy = async (jupiter, tokenA) => {
 	const performanceOfIterationStart = performance.now();
@@ -40,7 +41,7 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 			.computeRoutes({
 				inputMint: new PublicKey(inputToken.address),
 				outputMint: new PublicKey(outputToken.address),
-				inputAmount: amountToTrade,
+				amount: JSBI.BigInt(amountToTrade),
 				slippage,
 				forceFetch: true,
 			})
@@ -64,11 +65,14 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 
 		// update slippage with "profit or kill" slippage
 		if (cache.config.slippage === "profitOrKill") {
-			route.outAmountWithSlippage = cache.lastBalance["tokenA"];
+			route.otherAmountThreshold = JSBI.BigInt(cache.lastBalance["tokenA"]);
 		}
 
 		// calculate profitability
-		let simulatedProfit = calculateProfit(baseAmount, await route.outAmount);
+		let simulatedProfit = calculateProfit(
+			baseAmount,
+			await JSBI.toNumber(route.outAmount)
+		);
 
 		// store max profit spotted
 		if (simulatedProfit > cache.maxProfitSpotted["buy"]) {
@@ -102,7 +106,7 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 			}
 			if (cache.hotkeys.r) {
 				console.log("[R] PRESSED - REVERT BACK SWAP!");
-				route.outAmountWithSlippage = 0;
+				route.otherAmountThreshold = JSBI.BigInt(0);
 			}
 
 			if (cache.tradingEnabled || cache.hotkeys.r) {
@@ -113,8 +117,14 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 					buy: cache.sideBuy,
 					inputToken: inputToken.symbol,
 					outputToken: outputToken.symbol,
-					inAmount: toDecimal(route.inAmount, inputToken.decimals),
-					expectedOutAmount: toDecimal(route.outAmount, outputToken.decimals),
+					inAmount: toDecimal(
+						JSBI.toNumber(route.inAmount),
+						inputToken.decimals
+					),
+					expectedOutAmount: toDecimal(
+						JSBI.toNumber(route.outAmount),
+						outputToken.decimals
+					),
 					expectedProfit: simulatedProfit,
 				};
 

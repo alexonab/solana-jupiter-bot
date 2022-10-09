@@ -1,3 +1,4 @@
+const JSBI = require("jsbi");
 const { PublicKey } = require("@solana/web3.js");
 const {
 	calculateProfit,
@@ -42,7 +43,7 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 		const routes = await jupiter.computeRoutes({
 			inputMint: new PublicKey(inputToken.address),
 			outputMint: new PublicKey(outputToken.address),
-			inputAmount: amountToTrade,
+			amount: JSBI.BigInt(amountToTrade),
 			slippage,
 			forceFetch: true,
 		});
@@ -63,12 +64,16 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 
 		// update slippage with "profit or kill" slippage
 		if (cache.config.slippage === "profitOrKill") {
-			route.outAmountWithSlippage =
-				cache.lastBalance[cache.sideBuy ? "tokenB" : "tokenA"];
+			route.otherAmountThreshold = JSBI.BigInt(
+				cache.lastBalance[cache.sideBuy ? "tokenB" : "tokenA"]
+			);
 		}
 
 		// calculate profitability
-		let simulatedProfit = calculateProfit(baseAmount, await route.outAmount);
+		let simulatedProfit = calculateProfit(
+			baseAmount,
+			JSBI.toNumber(await route.outAmount)
+		);
 
 		// store max profit spotted
 		if (
@@ -104,7 +109,7 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 			}
 			if (cache.hotkeys.r) {
 				console.log("[R] PRESSED - REVERT BACK SWAP!");
-				route.outAmountWithSlippage = 0;
+				route.otherAmountThreshold = JSBI.BigInt(0);
 			}
 
 			if (cache.tradingEnabled || cache.hotkeys.r) {
@@ -115,8 +120,14 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 					buy: cache.sideBuy,
 					inputToken: inputToken.symbol,
 					outputToken: outputToken.symbol,
-					inAmount: toDecimal(route.inAmount, inputToken.decimals),
-					expectedOutAmount: toDecimal(route.outAmount, outputToken.decimals),
+					inAmount: toDecimal(
+						JSBI.toNumber(route.inAmount),
+						inputToken.decimals
+					),
+					expectedOutAmount: toDecimal(
+						JSBI.toNumber(route.outAmount),
+						outputToken.decimals
+					),
 					expectedProfit: simulatedProfit,
 				};
 
