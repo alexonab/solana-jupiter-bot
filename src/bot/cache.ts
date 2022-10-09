@@ -13,8 +13,13 @@ export interface Config {
 }
 
 export interface Token {
-	symbol: string;
+	chainId: number;
 	address: string;
+	symbol: string;
+	name: string;
+	decimals: number;
+	logoURI: string;
+	tags: string[];
 }
 
 export interface TradeSize {
@@ -26,8 +31,53 @@ export interface UI {
 	defaultColor: string;
 }
 
+export interface TCache {
+	config: Config;
+	startTime?: Date;
+	queue?: {};
+	queueThrottle?: number;
+	sideBuy: boolean;
+	iteration: number;
+	performanceOfTxStart: number;
+	performanceOfIteration: number;
+	iterationPerMinute: any;
+	initialBalance: { tokenA: number; tokenB: number };
+	currentBalance: { tokenA: number; tokenB: number };
+	currentProfit: { tokenA: number; tokenB: number };
+	lastBalance: { tokenA: number; tokenB: number };
+	profit: { tokenA: number; tokenB: number };
+	maxProfitSpotted: { buy: number; sell: number };
+	tradeCounter: {
+		buy: { success: number; fail: number };
+		sell: { success: number; fail: number };
+	};
+	ui: {
+		defaultColor: string;
+		showPerformanceOfRouteCompChart: boolean;
+		showProfitChart: boolean;
+		showTradeHistory: boolean;
+		hideRpc: boolean;
+		showHelp: boolean;
+		allowClear: boolean;
+		minimalMode: boolean;
+	};
+	chart: {
+		spottedMax: { buy: any[]; sell: any[] };
+		performanceOfRouteComp: any[];
+	};
+	hotkeys: { e: boolean; r: boolean };
+	tradingEnabled: boolean;
+	wrapUnwrapSOL: boolean;
+	swappingRightNow: boolean;
+	fetchingResultsFromSolscan: boolean;
+	fetchingResultsFromSolscanStart: number;
+	tradeHistory: never[];
+	availableRoutes: { buy: number; sell: number };
+	isSetupDone: boolean;
+}
+
 // global cache
-export const cache = {
+export const cache: TCache = {
 	config: <Config>{},
 	startTime: new Date(),
 	queue: {},

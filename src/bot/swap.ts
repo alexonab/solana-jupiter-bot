@@ -1,4 +1,5 @@
 const { calculateProfit, toDecimal, storeItInTempAsJSON } = require("../utils");
+import { RouteInfo } from "@jup-ag/core";
 // const cache = require("./cache");
 import { cache } from "./cache";
 const { getSwapResultFromSolscanParser } = require("../services/solscan");
@@ -9,7 +10,7 @@ export const swap = async (
 			routeInfo: any;
 		}) => PromiseLike<{ execute: any }> | { execute: any };
 	},
-	route: any
+	route: RouteInfo
 ) => {
 	try {
 		const performanceOfTxStart = performance.now();

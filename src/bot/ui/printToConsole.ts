@@ -1,20 +1,13 @@
-// const ui = require("cliui")({ width: 140 });
 // @ts-ignore
 import cliui from "cliui";
 const ui = cliui({ width: 140 });
-// const ch = require("chalk");
 import ch from "chalk";
 
-// const moment = require("moment");
 import moment from "moment";
-// const chart = require("asciichart");
 // @ts-ignore
 import chart from "asciichart";
-
-const { toDecimal } = require("../../utils");
-// const cache = require("../cache");
+import { toDecimal } from "../../utils";
 import { cache } from "../cache";
-// const JSBI = require("jsbi");
 import JSBI from "jsbi";
 
 const formatStatusMessage = () => {
@@ -232,7 +225,8 @@ export const printToConsole = ({
 						text: `MIN INTERVAL: ${ch[cache.ui.defaultColor](
 							cache.config.minInterval
 							//@ts-ignore
-						)} ms QUEUE: ${ch[cache.ui.defaultColor](
+						)} ms QUEUE: ${<string>ch[cache.ui.defaultColor](
+							// @ts-ignore
 							Object.keys(cache.queue).length
 							//@ts-ignore
 						)}/${ch[cache.ui.defaultColor](cache.queueThrottle)}`,
@@ -242,6 +236,7 @@ export const printToConsole = ({
 				ui.div(
 					" ",
 					" ",
+					// @ts-ignore
 					Object.values(cache.queue)
 						.map(
 							// @ts-ignore

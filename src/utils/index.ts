@@ -1,18 +1,12 @@
-// const chalk = require("chalk");
 import chalk from "chalk";
-// const fs = require("fs");
 import fs from "fs";
-// const ora = require("ora-classic");
-// import ora from "ora";
 import * as ora from "ora";
-
-// const { logExit } = require("../bot/exit");
+import { TCache } from "../bot/cache";
 import { logExit } from "../bot/exit";
 
 const createTempDir = () => !fs.existsSync("./temp") && fs.mkdirSync("./temp");
 
-// @ts-ignore
-const storeItInTempAsJSON = (filename, data) =>
+const storeItInTempAsJSON = (filename: string, data: {} | []) =>
 	fs.writeFileSync(`./temp/${filename}.json`, JSON.stringify(data, null, 2));
 // @ts-ignore
 const createConfigFile = (config) => {
@@ -68,10 +62,6 @@ const verifyConfig = (config) => {
 	return { result, badConfig };
 };
 
-/**
- * It loads the config file and returns the config object
- * @returns The config object
- */
 const loadConfigFile = ({ showSpinner = false }) => {
 	let config = {};
 	let spinner;
@@ -95,20 +85,21 @@ const loadConfigFile = ({ showSpinner = false }) => {
 	spinner?.fail(chalk.redBright("Loading config failed!\n"));
 	throw new Error("\nNo config.json file found!\n");
 };
-// @ts-ignore
-const calculateProfit = (oldVal, newVal) => ((newVal - oldVal) / oldVal) * 100;
-// @ts-ignore
-const toDecimal = (number, decimals) =>
+
+const calculateProfit = (oldVal: number, newVal: number): number =>
+	((newVal - oldVal) / oldVal) * 100;
+
+const toDecimal = (number: number, decimals: number): string =>
 	// @ts-ignore
 	parseFloat(number / 10 ** decimals).toFixed(decimals);
-// @ts-ignore
-const toNumber = (number, decimals) => number * 10 ** decimals;
+
+const toNumber = (number: number, decimals: number): number =>
+	number * 10 ** decimals;
 
 /**
  * It calculates the number of iterations per minute and updates the cache.
  */
-// @ts-ignore
-const updateIterationsPerMin = (cache) => {
+const updateIterationsPerMin = (cache: TCache) => {
 	const iterationTimer =
 		(performance.now() - cache.iterationPerMinute.start) / 1000;
 
@@ -122,8 +113,7 @@ const updateIterationsPerMin = (cache) => {
 };
 // @ts-ignore
 const checkRoutesResponse = (routes) => {
-	// @ts-ignore
-	if (Object.hasOwn(routes, "routesInfos")) {
+	if (Object.prototype.hasOwnProperty.call(routes, "routesInfos")) {
 		if (routes.routesInfos.length === 0) {
 			logExit(1, {
 				message: "No routes found or something is wrong with RPC / Jupiter! ",
@@ -146,20 +136,6 @@ const checkForEnvFile = () => {
 		process.exit(1);
 	}
 };
-
-// module.exports = {
-// 	createTempDir,
-// 	storeItInTempAsJSON,
-// 	createConfigFile,
-// 	loadConfigFile,
-// 	verifyConfig,
-// 	calculateProfit,
-// 	toDecimal,
-// 	toNumber,
-// 	updateIterationsPerMin,
-// 	checkRoutesResponse,
-// 	checkForEnvFile,
-// };
 
 export {
 	createTempDir,

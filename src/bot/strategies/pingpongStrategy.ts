@@ -9,11 +9,15 @@ import {
 	updateIterationsPerMin,
 	checkRoutesResponse,
 } from "../../utils";
-import { cache } from "../cache";
+import { cache, Token } from "../cache";
 import { printToConsole } from "../ui";
 import { swap, failedSwapHandler, successSwapHandler } from "../swap";
-// @ts-ignore
-export const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
+import { Jupiter, RouteInfo } from "@jup-ag/core";
+export const pingpongStrategy = async (
+	jupiter: Jupiter,
+	tokenA: Token,
+	tokenB: Token
+): Promise<void> => {
 	const performanceOfIterationStart = performance.now();
 	let performanceOfRouteComp = 0;
 	cache.iteration++;
@@ -68,7 +72,7 @@ export const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 		performanceOfRouteComp = performance.now() - performanceOfRouteCompStart;
 
 		// choose first route
-		const route = await routes.routesInfos[0];
+		const route: RouteInfo = routes.routesInfos[0];
 
 		// update slippage with "profit or kill" slippage
 		if (cache.config.slippage === "profitOrKill") {
@@ -80,7 +84,7 @@ export const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 		// calculate profitability
 		let simulatedProfit = calculateProfit(
 			baseAmount,
-			JSBI.toNumber(await route.outAmount)
+			JSBI.toNumber(route.outAmount)
 		);
 
 		// store max profit spotted

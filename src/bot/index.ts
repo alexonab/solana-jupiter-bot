@@ -5,14 +5,16 @@ dotenv.config();
 
 import { toNumber } from "../utils";
 import { handleExit, logExit } from "./exit";
-import { cache } from "./cache";
+import { cache, Token } from "./cache";
 import { setup, getInitialOutAmountWithSlippage } from "./setup";
 import { arbitrageStrategy } from "./strategies/arbitrageStrategy";
 import { pingpongStrategy } from "./strategies/pingpongStrategy";
 import JSBI from "jsbi";
-const watcher = async (jupiter: any, tokenA: any, tokenB: any) => {
+import { Jupiter } from "@jup-ag/core";
+const watcher = async (jupiter: Jupiter, tokenA: Token, tokenB: Token) => {
 	if (
 		!cache.swappingRightNow &&
+		// @ts-ignore
 		Object.keys(cache.queue).length < cache.queueThrottle
 	) {
 		if (cache.config.tradingStrategy === "pingpong") {

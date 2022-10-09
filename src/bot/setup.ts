@@ -40,12 +40,12 @@ export const setup = async () => {
 			tokens = JSON.parse(fs.readFileSync("./temp/tokens.json"));
 			// find tokens full Object
 			tokenA = tokens.find(
-				(t: { address: any }) => t.address === cache.config.tokenA.address
+				(t: { address: {} }) => t.address === cache.config.tokenA.address
 			);
 
 			if (cache.config.tradingStrategy !== "arbitrage")
 				tokenB = tokens.find(
-					(t: { address: any }) => t.address === cache.config.tokenB.address
+					(t: { address: {} }) => t.address === cache.config.tokenB.address
 				);
 		} catch (error) {
 			spinner.text = chalk.black.bgRedBright(
