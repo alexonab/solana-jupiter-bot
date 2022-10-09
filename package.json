@@ -1,6 +1,6 @@
 {
 	"name": "solana-jupiter-bot",
-	"version": "0.0.10-beta",
+	"version": "0.1.0-beta",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -21,7 +21,7 @@
 		"./src/generator.js"
 	],
 	"dependencies": {
-		"@jup-ag/core": "^2.0.0-beta.4",
+		"@jup-ag/core": "3.0.0-beta.0",
 		"@solana/web3.js": "^1.44.0",
 		"asciichart": "^1.5.25",
 		"axios": "^0.27.2",

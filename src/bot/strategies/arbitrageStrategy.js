@@ -31,6 +31,8 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 		// default slippage
 		const slippage =
 			typeof cache.config.slippage === "number" ? cache.config.slippage : 1;
+
+		const slippageBps = Math.ceil(slippage * 100);
 		// set input / output token
 		const inputToken = tokenA;
 		const outputToken = tokenA;
@@ -42,7 +44,7 @@ const arbitrageStrategy = async (jupiter, tokenA) => {
 				inputMint: new PublicKey(inputToken.address),
 				outputMint: new PublicKey(outputToken.address),
 				amount: JSBI.BigInt(amountToTrade),
-				slippage,
+				slippageBps,
 				forceFetch: true,
 			})
 			.catch((err) => {

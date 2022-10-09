@@ -34,6 +34,8 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 		const slippage =
 			typeof cache.config.slippage === "number" ? cache.config.slippage : 1;
 
+		const slippageBps = Math.ceil(slippage * 100);
+
 		// set input / output token
 		const inputToken = cache.sideBuy ? tokenA : tokenB;
 		const outputToken = cache.sideBuy ? tokenB : tokenA;
@@ -44,7 +46,7 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 			inputMint: new PublicKey(inputToken.address),
 			outputMint: new PublicKey(outputToken.address),
 			amount: JSBI.BigInt(amountToTrade),
-			slippage,
+			slippageBps,
 			forceFetch: true,
 		});
 
