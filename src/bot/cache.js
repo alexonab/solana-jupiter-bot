@@ -49,6 +49,7 @@ const cache = {
 		hideRpc: false,
 		showHelp: true,
 		allowClear: true,
+		minimalMode: false,
 	},
 	chart: {
 		spottedMax: {
