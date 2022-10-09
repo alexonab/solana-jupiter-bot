@@ -114,7 +114,7 @@ const getInitialOutAmountWithSlippage = async (
 			inputMint: new PublicKey(inputToken.address),
 			outputMint: new PublicKey(outputToken.address),
 			amount: JSBI.BigInt(amountToTrade),
-			slippage: 0,
+			slippageBps: 0,
 			forceFeech: true,
 		});
 
