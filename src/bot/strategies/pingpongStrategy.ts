@@ -1,5 +1,3 @@
-// const JSBI = require("jsbi");
-// const { PublicKey } = require("@solana/web3.js");
 import JSBI from "jsbi";
 import { PublicKey } from "@solana/web3.js";
 
@@ -9,7 +7,7 @@ import {
 	updateIterationsPerMin,
 	checkRoutesResponse,
 } from "../../utils";
-import { cache, Token } from "../cache";
+import { cache, Token, TradeEntry } from "../cache";
 import { printToConsole } from "../ui";
 import { swap, failedSwapHandler, successSwapHandler } from "../swap";
 import { Jupiter, RouteInfo } from "@jup-ag/core";
@@ -23,7 +21,6 @@ export const pingpongStrategy = async (
 	cache.iteration++;
 	const date = new Date();
 	const i = cache.iteration;
-	//@ts-ignore
 	cache.queue[i] = -1;
 
 	try {
@@ -65,8 +62,6 @@ export const pingpongStrategy = async (
 			routes.routesInfos.length;
 
 		// update status as OK
-		//@ts-ignore
-
 		cache.queue[i] = 0;
 
 		performanceOfRouteComp = performance.now() - performanceOfRouteCompStart;
@@ -129,7 +124,7 @@ export const pingpongStrategy = async (
 			if (cache.tradingEnabled || cache.hotkeys.r) {
 				cache.swappingRightNow = true;
 				// store trade to the history
-				let tradeEntry = {
+				let tradeEntry: TradeEntry = {
 					date: date.toLocaleString(),
 					buy: cache.sideBuy,
 					inputToken: inputToken.symbol,
@@ -174,7 +169,6 @@ export const pingpongStrategy = async (
 
 				tradeEntry = {
 					...tradeEntry,
-					// @ts-ignore
 					outAmount: tx.outputAmount || 0,
 					profit,
 					performanceOfTx,
@@ -215,15 +209,11 @@ export const pingpongStrategy = async (
 			simulatedProfit,
 		});
 	} catch (error) {
-		//@ts-ignore
-
 		cache.queue[i] = 1;
 		console.log(error);
 	} finally {
 		cache.performanceOfIteration =
 			performance.now() - performanceOfIterationStart - performanceOfRouteComp;
-		//@ts-ignore
-
 		delete cache.queue[i];
 	}
 };

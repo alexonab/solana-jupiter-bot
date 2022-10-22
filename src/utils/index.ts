@@ -115,14 +115,21 @@ const updateIterationsPerMin = (cache: TCache) => {
 const checkRoutesResponse = (routes) => {
 	if (Object.prototype.hasOwnProperty.call(routes, "routesInfos")) {
 		if (routes.routesInfos.length === 0) {
-			logExit(1, {
-				message: "No routes found or something is wrong with RPC / Jupiter! ",
+			logExit({
+				error: {
+					name: "No routes found",
+					message: "No routes found or something is wrong with RPC / Jupiter! ",
+				},
+				code: 1,
 			});
 			process.exit(1);
 		}
 	} else {
-		logExit(1, {
-			message: "Something is wrong with RPC / Jupiter! ",
+		logExit({
+			error: {
+				name: "Connection Error",
+				message: "Something is wrong with RPC / Jupiter! ",
+			},
 		});
 		process.exit(1);
 	}
@@ -130,8 +137,8 @@ const checkRoutesResponse = (routes) => {
 
 const checkForEnvFile = () => {
 	if (!fs.existsSync("./.env")) {
-		logExit(1, {
-			message: "No .env file found! ",
+		logExit({
+			error: { name: ".env Error", message: "No .env file found! " },
 		});
 		process.exit(1);
 	}

@@ -31,11 +31,25 @@ export interface UI {
 	defaultColor: string;
 }
 
+export interface TradeEntry {
+	date?: string;
+	buy?: any;
+	inputToken?: any;
+	outputToken?: any;
+	inAmount: any;
+	expectedOutAmount?: any;
+	expectedProfit?: any;
+	outAmount?: any;
+	profit?: any;
+	performanceOfTx?: number;
+	error?: string;
+}
+
 export interface TCache {
 	config: Config;
 	startTime?: Date;
-	queue?: {};
-	queueThrottle?: number;
+	queue: { [key: number]: number };
+	queueThrottle: number;
 	sideBuy: boolean;
 	iteration: number;
 	performanceOfTxStart: number;
@@ -71,7 +85,7 @@ export interface TCache {
 	swappingRightNow: boolean;
 	fetchingResultsFromSolscan: boolean;
 	fetchingResultsFromSolscanStart: number;
-	tradeHistory: never[];
+	tradeHistory: TradeEntry[];
 	availableRoutes: { buy: number; sell: number };
 	isSetupDone: boolean;
 }

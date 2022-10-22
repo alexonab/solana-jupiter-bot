@@ -1,8 +1,19 @@
 import fs from "fs";
 import chalk from "chalk";
+import { cache } from "./cache";
 
-// @ts-ignore
-export const logExit = (code = 0, error) => {
+export const logExit = ({
+	error,
+	code = 0,
+}: {
+	error:
+		| {
+				name: string;
+				message: string;
+		  }
+		| any;
+	code?: number;
+}) => {
 	code === 0 && console.log(chalk.black.bgMagentaBright.bold(error.message));
 
 	if (code === 1) {
@@ -11,7 +22,6 @@ export const logExit = (code = 0, error) => {
 				chalk.black.bgRedBright.black("ERROR: " + chalk.bold(error.message))
 			);
 		error?.stack && console.log(chalk.redBright(error.stack));
-		// @ts-ignore
 		if (cache.isSetupDone) {
 			console.log(
 				chalk.black.bgYellowBright(
@@ -34,7 +44,6 @@ export const handleExit = () => {
 
 		// write cache to file
 		try {
-			// @ts-ignore
 			fs.writeFileSync("./temp/cache.json", JSON.stringify(cache, null, 2));
 			console.log(
 				chalk.black.bgGreenBright(

@@ -11,10 +11,15 @@ import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 
 import { loadConfigFile } from "../utils";
 import { intro, listenHotkeys } from "./ui";
-import { cache } from "./cache";
+import { cache, Token } from "./cache";
+import { logExit, handleExit } from "./exit";
 
-export const setup = async () => {
-	let spinner, tokens, tokenA, tokenB, wallet;
+export const setup = async (): Promise<{
+	jupiter: Jupiter;
+	tokenA: Token;
+	tokenB: Token;
+}> => {
+	let jupiter, tokenA, tokenB, tokens, wallet, spinner;
 	try {
 		// listen for hotkeys
 		listenHotkeys();
@@ -85,7 +90,7 @@ export const setup = async () => {
 
 		spinner.text = "Loading Jupiter SDK...";
 
-		const jupiter = await Jupiter.load({
+		jupiter = await Jupiter.load({
 			connection, // @ts-ignore
 			cluster: cache.config.network,
 			user: wallet,
@@ -95,40 +100,45 @@ export const setup = async () => {
 
 		cache.isSetupDone = true;
 		spinner.succeed("Setup done!");
-
-		return { jupiter, tokenA, tokenB };
-	} catch (error) {
+	} catch (error: any) {
+		if (error?.code === "ENOTFOUND") {
+			if (spinner) {
+				spinner.text = chalk.black.bgRedBright(
+					`
+					Most likely something is wrong with the Connection!
+					Please make sure that ${chalk.bold("RPC ")} inside ${chalk.bold(
+						"config.json"
+					)} file is correct
+					and the RPC is running
+					`
+				);
+			}
+		}
 		if (spinner)
 			spinner.fail(
 				chalk.bold.redBright(`Setting up failed!\n 	${spinner.text}`)
 			);
-		// @ts-ignore
-		logExit(1, error);
+		logExit({ error, code: 1 });
 		process.exitCode = 1;
+		handleExit();
 	}
+	// @ts-ignore
+	return { jupiter, tokenA, tokenB };
 };
 
 export const getInitialOutAmountWithSlippage = async (
-	jupiter: {
-		computeRoutes: (arg0: {
-			inputMint: any;
-			outputMint: any;
-			amount: any;
-			slippageBps: number;
-			forceFeech: boolean;
-		}) => any;
-	},
-	inputToken: { address: any },
-	outputToken: { address: any },
+	jupiter: Jupiter,
+	inputToken: Token,
+	outputToken: Token,
 	amountToTrade: number
 ) => {
+	if (!jupiter) return;
 	let spinner;
 	try {
 		spinner = ora
 			.default({
 				text: "Computing routes...",
 				//@ts-ignore
-
 				discardStdin: false,
 				color: "magenta",
 			})
@@ -140,18 +150,28 @@ export const getInitialOutAmountWithSlippage = async (
 			outputMint: new PublicKey(outputToken.address),
 			amount: JSBI.BigInt(amountToTrade),
 			slippageBps: 0,
-			forceFeech: true,
+			forceFetch: true,
 		});
 
-		if (routes?.routesInfos?.length > 0) spinner.succeed("Routes computed!");
-		else spinner.fail("No routes found. Something is wrong!");
+		if (!routes?.routesInfos) {
+			const errorMessage: string =
+				"No initial routes found! It's likely something is wrong with the connection or RPC.";
+			spinner.fail(chalk.bold.redBright(errorMessage));
+			throw new Error(errorMessage);
+		}
 
-		return routes.routesInfos[0].otherAmountThreshold;
+		if (routes?.routesInfos?.length === 0) {
+			const errorMessage: string = "No initial routes found in the response";
+			spinner.fail(chalk.bold.redBright(errorMessage));
+			throw new Error(errorMessage);
+		}
+		spinner.succeed("Routes computed!");
+		return routes?.routesInfos[0].otherAmountThreshold;
 	} catch (error) {
 		if (spinner)
 			spinner.fail(chalk.bold.redBright("Computing routes failed!\n"));
-		// @ts-ignore
-		logExit(1, error);
+		handleExit();
+		logExit({ error, code: 1 });
 		process.exitCode = 1;
 	}
 };

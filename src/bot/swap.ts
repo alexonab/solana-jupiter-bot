@@ -1,7 +1,6 @@
 const { calculateProfit, toDecimal, storeItInTempAsJSON } = require("../utils");
 import { RouteInfo } from "@jup-ag/core";
-// const cache = require("./cache");
-import { cache } from "./cache";
+import { cache, TradeEntry } from "./cache";
 const { getSwapResultFromSolscanParser } = require("../services/solscan");
 
 export const swap = async (
@@ -34,15 +33,7 @@ export const swap = async (
 	}
 };
 
-export const failedSwapHandler = (tradeEntry: {
-	date: string;
-	buy: any;
-	inputToken: any;
-	outputToken: any;
-	inAmount: any;
-	expectedOutAmount: any;
-	expectedProfit: any;
-}) => {
+export const failedSwapHandler = (tradeEntry: TradeEntry) => {
 	// update counter
 	cache.tradeCounter[cache.sideBuy ? "buy" : "sell"].fail++;
 
@@ -55,17 +46,7 @@ export const failedSwapHandler = (tradeEntry: {
 
 export const successSwapHandler = async (
 	tx: { txid: any; outputAmount: any; inputAmount: any },
-	tradeEntry: {
-		date?: string;
-		buy?: any;
-		inputToken?: any;
-		outputToken?: any;
-		inAmount: any;
-		expectedOutAmount?: any;
-		expectedProfit?: any;
-		outAmount?: any;
-		profit?: any;
-	},
+	tradeEntry: TradeEntry,
 	tokenA: { decimals: any },
 	tokenB: { decimals: any }
 ) => {
@@ -146,7 +127,7 @@ export const successSwapHandler = async (
 		);
 
 		// update trade history
-		let tempHistory = cache.tradeHistory;
+		let tempHistory: TradeEntry[] = cache.tradeHistory;
 
 		tradeEntry.inAmount = toDecimal(inAmountFromSolscanParser, tokenA.decimals);
 		tradeEntry.outAmount = toDecimal(
@@ -158,7 +139,6 @@ export const successSwapHandler = async (
 			cache.lastBalance["tokenA"],
 			outAmountFromSolscanParser
 		);
-		// @ts-ignore
 		tempHistory.push(tradeEntry);
 		cache.tradeHistory = tempHistory;
 	}
