@@ -216,7 +216,7 @@ function printToConsole({
 			ui.div(
 				{
 					text: `IN:  ${chalk.yellowBright(
-						toDecimal(route.inAmount, inputToken.decimals)
+						route.inAmount
 					)} ${chalk[cache.ui.defaultColor](inputToken.symbol)}`,
 				},
 				{
@@ -242,7 +242,7 @@ function printToConsole({
 			ui.div(
 				{
 					text: `OUT: ${chalk[simulatedProfit > 0 ? "greenBright" : "red"](
-						toDecimal(route.outAmount, outputToken.decimals)
+						route.outAmount
 					)} ${chalk[cache.ui.defaultColor](outputToken.symbol)}`,
 				},
 				{
@@ -250,7 +250,7 @@ function printToConsole({
 				},
 				{
 					text: `MIN. OUT: ${chalk.magentaBright(
-						toDecimal(route.outAmountWithSlippage, outputToken.decimals)
+						route.outAmount
 					)}`,
 				},
 				{
@@ -289,15 +289,15 @@ function printToConsole({
 
 			ui.div(
 				`${chalk[cache.currentBalance.tokenA > 0 ? "yellowBright" : "gray"](
-					toDecimal(cache.currentBalance.tokenA, tokenA.decimals)
+					cache.currentBalance.tokenA
 				)} ${chalk[cache.ui.defaultColor](tokenA.symbol)}`,
 
 				`${chalk[cache.lastBalance.tokenA > 0 ? "yellowBright" : "gray"](
-					toDecimal(cache.lastBalance.tokenA, tokenA.decimals)
+					cache.lastBalance.tokenA
 				)} ${chalk[cache.ui.defaultColor](tokenA.symbol)}`,
 
 				`${chalk[cache.initialBalance.tokenA > 0 ? "yellowBright" : "gray"](
-					toDecimal(cache.initialBalance.tokenA, tokenA.decimals)
+					cache.initialBalance.tokenA
 				)} ${chalk[cache.ui.defaultColor](tokenA.symbol)}`,
 
 				`${chalk[cache.currentProfit.tokenA > 0 ? "greenBright" : "redBright"](
@@ -308,15 +308,15 @@ function printToConsole({
 
 			ui.div(
 				`${chalk[cache.currentBalance.tokenB > 0 ? "yellowBright" : "gray"](
-					toDecimal(cache.currentBalance.tokenB, tokenB.decimals)
+					cache.currentBalance.tokenB
 				)} ${chalk[cache.ui.defaultColor](tokenB.symbol)}`,
 
 				`${chalk[cache.lastBalance.tokenB > 0 ? "yellowBright" : "gray"](
-					toDecimal(cache.lastBalance.tokenB, tokenB.decimals)
+					cache.lastBalance.tokenB
 				)} ${chalk[cache.ui.defaultColor](tokenB.symbol)}`,
 
 				`${chalk[cache.initialBalance.tokenB > 0 ? "yellowBright" : "gray"](
-					toDecimal(cache.initialBalance.tokenB, tokenB.decimals)
+					cache.initialBalance.tokenB
 				)} ${chalk[cache.ui.defaultColor](tokenB.symbol)}`,
 
 				`${chalk[cache.currentProfit.tokenB > 0 ? "greenBright" : "redBright"](
@@ -415,6 +415,7 @@ function printToConsole({
 			// print UI
 			console.log(ui.toString());
 		}
+		
 	} catch (error) {
 		console.log(error);
 	}
