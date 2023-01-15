@@ -2,8 +2,9 @@ const fs = require("fs");
 const chalk = require("chalk");
 const ora = require("ora-classic");
 const bs58 = require("bs58");
-const { Jupiter } = require("@jup-ag/core");
+const { Prism } = require("@prism-hq/prism-ag")
 const { Connection, Keypair, PublicKey } = require("@solana/web3.js");
+const { Wallet } = require("@project-serum/anchor");
 
 const { logExit } = require("./exit");
 const { loadConfigFile } = require("../utils");
@@ -53,9 +54,10 @@ const setup = async () => {
 			) {
 				throw new Error("Wallet check failed!");
 			} else {
-				wallet = Keypair.fromSecretKey(
+				// let wallet = new NodeWallet(new Keypair());
+				wallet = new Wallet(Keypair.fromSecretKey(
 					bs58.decode(process.env.SOLANA_WALLET_PRIVATE_KEY)
-				);
+				));
 			}
 		} catch (error) {
 			spinner.text = chalk.black.bgRedBright(
@@ -70,20 +72,25 @@ const setup = async () => {
 		// connect to RPC
 		const connection = new Connection(cache.config.rpc[0]);
 
-		spinner.text = "Loading Jupiter SDK...";
+		spinner.text = "Loading Prism SDK...";
 
-		const jupiter = await Jupiter.load({
-			connection,
-			cluster: cache.config.network,
+		// default slippage
+		const slippage =
+			typeof cache.config.slippage === "number" ? cache.config.slippage : 1;
+		
+		prism = await Prism.init({
 			user: wallet,
-			restrictIntermediateTokens: true,
-			wrapUnwrapSOL: cache.wrapUnwrapSOL,
+			slippage: slippage * 100,
+			connection: connection,
 		});
+
+		// set initial & current & last balance for tokenA
+		cache.initialBalance.tokenA = cache.config.tradeSize.value;
 
 		cache.isSetupDone = true;
 		spinner.succeed("Setup done!");
 
-		return { jupiter, tokenA, tokenB };
+		return { prism, tokenA, tokenB };
 	} catch (error) {
 		if (spinner)
 			spinner.fail(
@@ -94,8 +101,8 @@ const setup = async () => {
 	}
 };
 
-const getInitialOutAmountWithSlippage = async (
-	jupiter,
+const getInitialOutAmount = async (
+	prism,
 	inputToken,
 	outputToken,
 	amountToTrade
@@ -109,18 +116,13 @@ const getInitialOutAmountWithSlippage = async (
 		}).start();
 
 		// compute routes for the first time
-		const routes = await jupiter.computeRoutes({
-			inputMint: new PublicKey(inputToken.address),
-			outputMint: new PublicKey(outputToken.address),
-			inputAmount: amountToTrade,
-			slippage: 0,
-			forceFeech: true,
-		});
+		await prism.loadRoutes(inputToken.address, outputToken.address);
+		routes = prism.getRoutes(cache.config.tradeSize.value);
 
-		if (routes?.routesInfos?.length > 0) spinner.succeed("Routes computed!");
+		if (routes?.length > 0) spinner.succeed("Routes computed!");
 		else spinner.fail("No routes found. Something is wrong!");
-
-		return routes.routesInfos[0].outAmountWithSlippage;
+		
+		return routes[0].amountOut;
 	} catch (error) {
 		if (spinner)
 			spinner.fail(chalk.bold.redBright("Computing routes failed!\n"));
@@ -131,5 +133,5 @@ const getInitialOutAmountWithSlippage = async (
 
 module.exports = {
 	setup,
-	getInitialOutAmountWithSlippage,
+	getInitialOutAmount,
 };
