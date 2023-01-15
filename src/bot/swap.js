@@ -18,15 +18,16 @@ const swap = async (prism, route) => {
 
 		if (result === undefined) {
 			return [
-				{ response: { status: "Error", message: "TX failed, No response" } },
+				{ response: { status: "Error", error: "TX failed, No response" } },
 				0,
 			];
 		}
 
 		return [result, performanceOfTx];
 	} catch (error) {
+		console.log('swap error:', error)
 		return [
-			{ response: { message: error?.message || "TX failed, Unknown error" } },
+			{ response: { status: "Error", error: error?.message || "TX failed, Unknown error" } },
 			0,
 		];
 	}
