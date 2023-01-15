@@ -6,7 +6,7 @@ const { logExit } = require("../bot/exit");
 const createTempDir = () => !fs.existsSync("./temp") && fs.mkdirSync("./temp");
 
 const storeItInTempAsJSON = (filename, data) =>
-	fs.writeFileSync(`./temp/${filename}.json`, JSON.stringify(data, null, 2));
+	fs.writeFileSync(`./temp/${filename}.json`, JSON.stringify(data, null, 2) ?? []);
 
 const createConfigFile = (config) => {
 	const configSpinner = ora({
@@ -103,8 +103,8 @@ const updateIterationsPerMin = (cache) => {
 };
 
 const checkRoutesResponse = (routes) => {
-	if (Object.hasOwn(routes, "routesInfos")) {
-		if (routes.routesInfos.length === 0) {
+	if (routes) {
+		if (routes.length === 0) {
 			logExit(1, {
 				message: "No routes found or something is wrong with RPC / Jupiter! ",
 			});
