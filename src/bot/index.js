@@ -33,7 +33,7 @@ const pingpongStrategy = async (prism, tokenA, tokenB) => {
 			cache.config.tradeSize.strategy === "cumulative"
 				? cache.currentBalance[cache.sideBuy ? "tokenA" : "tokenB"]
 				: cache.initialBalance[cache.sideBuy ? "tokenA" : "tokenB"];
-
+		
 		const baseAmount = cache.lastBalance[cache.sideBuy ? "tokenB" : "tokenA"];
 
 		// set input / output token
@@ -42,7 +42,8 @@ const pingpongStrategy = async (prism, tokenA, tokenB) => {
 
 		// check current routes
 		const performanceOfRouteCompStart = performance.now();
-
+		console.log(inputToken.address, outputToken.address, cache.sideBuy ? 'buy' : 'sell')
+		console.log('fetching routes');
 		await prism.loadRoutes(inputToken.address, outputToken.address);
 		const routes = prism.getRoutes(amountToTrade);
 
@@ -62,9 +63,10 @@ const pingpongStrategy = async (prism, tokenA, tokenB) => {
 		const route = routes[0];
 		route.inAmount = routes[0]?.amountIn;
 		route.outAmount = routes[0]?.amountOut;
+		console.log('route:', route?.providers, route?.provider)
 
 		// calculate profitability
-
+		
 		const simulatedProfit = calculateProfit(baseAmount, route.outAmount);
 
 		// store max profit spotted
@@ -146,14 +148,13 @@ const pingpongStrategy = async (prism, tokenA, tokenB) => {
 
 				tradeEntry = {
 					...tradeEntry,
-					outAmount: tx?.response?.fromAmount || 0,
+					outAmount: tx?.response?.toAmount || 0,
 					profit,
 					performanceOfTx,
 					error: tx?.response?.error || null,
 				};
 
 				// handle TX results
-				console.log('err check:', tx?.response?.status )
 				if (tx === undefined || tx?.response?.status == "Error") failedSwapHandler(tradeEntry);
 				else {
 					if (cache.hotkeys.r) {
@@ -165,8 +166,8 @@ const pingpongStrategy = async (prism, tokenA, tokenB) => {
 					successSwapHandler(tx, tradeEntry, tokenA, tokenB);
 				}
 			}
-			if (!tx === undefined) {
-				if (!tx.response.status == "Error") {
+			if (!(tx === undefined)) {
+				if (!(tx.response.status === "Error")) {
 					// change side
 					cache.sideBuy = !cache.sideBuy;
 				}
@@ -321,14 +322,14 @@ const arbitrageStrategy = async (prism, tokenA) => {
 
 				tradeEntry = {
 					...tradeEntry,
-					outAmount: tx?.response?.fromAmount || 0,
+					outAmount: tx?.response?.toAmount || 0,
 					profit,
 					performanceOfTx,
 					error: tx?.response?.error || null,
 				};
 
 				// handle TX results
-				if (tx.error) failedSwapHandler(tradeEntry);
+				if (tx === undefined || tx?.response?.status == "Error") failedSwapHandler(tradeEntry);
 				else {
 					if (cache.hotkeys.r) {
 						console.log("[R] - REVERT BACK SWAP - SUCCESS!");
@@ -341,9 +342,7 @@ const arbitrageStrategy = async (prism, tokenA) => {
 			}
 		}
 
-		if (tx) {
-			cache.swappingRightNow = false;
-		}
+		cache.swappingRightNow = false;
 
 		printToConsole({
 			date,
