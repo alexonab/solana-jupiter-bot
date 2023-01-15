@@ -1,27 +1,32 @@
 const { calculateProfit, toDecimal, storeItInTempAsJSON } = require("../utils");
 const cache = require("./cache");
 const { getSwapResultFromSolscanParser } = require("../services/solscan");
+const { TransactionInstruction, Transaction, Connection, TransactionMessage, PublicKey, Keypair, VersionedTransaction, sendAndConfirmTransaction, LAMPORTS_PER_SOL } = require("@solana/web3.js");
+const base58 = require("bs58");
+const { Token, TOKEN_PROGRAM_ID, AccountLayout } = require('@solana/spl-token')
 
-const swap = async (jupiter, route) => {
+const swap = async (prism, route) => {
 	try {
 		const performanceOfTxStart = performance.now();
 		cache.performanceOfTxStart = performanceOfTxStart;
 
-		if (process.env.DEBUG) storeItInTempAsJSON("routeInfoBeforeSwap", route);
-
-		const { execute } = await jupiter.exchange({
-			routeInfo: route,
-		});
-		const result = await execute();
-
-		if (process.env.DEBUG) storeItInTempAsJSON("result", result);
+		//if (process.env.DEBUG) storeItInTempAsJSON("routeInfoBeforeSwap", route);
+		
+		result = await prism.swap(route)
 
 		const performanceOfTx = performance.now() - performanceOfTxStart;
+
+		if (result === undefined) {
+			return [
+				{ response: { status: "Error", message: "TX failed, No response" } },
+				0,
+			];
+		}
 
 		return [result, performanceOfTx];
 	} catch (error) {
 		return [
-			{ error: { message: error?.message || "TX failed, Unknown error" } },
+			{ response: { message: error?.message || "TX failed, Unknown error" } },
 			0,
 		];
 	}
@@ -43,8 +48,7 @@ const failedSwapHandler = (tradeEntry) => {
 exports.failedSwapHandler = failedSwapHandler;
 
 const successSwapHandler = async (tx, tradeEntry, tokenA, tokenB) => {
-	if (process.env.DEBUG) storeItInTempAsJSON(`txResultFromSDK_${tx?.txid}`, tx);
-
+	//if (process.env.DEBUG) storeItInTempAsJSON(`txResultFromSDK_${tx?.txid}`, tx);
 	// update counter
 	cache.tradeCounter[cache.sideBuy ? "buy" : "sell"].success++;
 
@@ -53,11 +57,11 @@ const successSwapHandler = async (tx, tradeEntry, tokenA, tokenB) => {
 		if (cache.sideBuy) {
 			cache.lastBalance.tokenA = cache.currentBalance.tokenA;
 			cache.currentBalance.tokenA = 0;
-			cache.currentBalance.tokenB = tx.outputAmount;
+			cache.currentBalance.tokenB = tx.response.toAmount;
 		} else {
 			cache.lastBalance.tokenB = cache.currentBalance.tokenB;
 			cache.currentBalance.tokenB = 0;
-			cache.currentBalance.tokenA = tx.outputAmount;
+			cache.currentBalance.tokenA = tx.response.toAmount;
 		}
 
 		// update profit
@@ -77,23 +81,17 @@ const successSwapHandler = async (tx, tradeEntry, tokenA, tokenB) => {
 
 		// update trade history
 		let tempHistory = cache.tradeHistory;
-
-		tradeEntry.inAmount = toDecimal(
-			tx.inputAmount,
-			cache.sideBuy ? tokenA.decimals : tokenB.decimals
-		);
-		tradeEntry.outAmount = toDecimal(
-			tx.outputAmount,
-			cache.sideBuy ? tokenB.decimals : tokenA.decimals
-		);
+		tradeEntry.inAmount = tx.response.fromAmount;
+		tradeEntry.outAmount = tx.response.toAmount;
 
 		tradeEntry.profit = calculateProfit(
 			cache.lastBalance[cache.sideBuy ? "tokenB" : "tokenA"],
-			tx.outputAmount
+			tx.response.toAmount
 		);
 		tempHistory.push(tradeEntry);
 		cache.tradeHistory = tempHistory;
 	}
+
 	if (cache.config.tradingStrategy === "arbitrage") {
 		/** check real amounts on solscan because Jupiter SDK returns wrong amounts
 		 *  when we trading TokenA <> TokenA (arbitrage)
