@@ -51,11 +51,30 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 			inputMint: new PublicKey(inputToken.address),
 			outputMint: new PublicKey(outputToken.address),
 			amount: amountToTrade instanceof JSBI ? amountToTrade : JSBI.BigInt(amountToTrade),
-			slippageBps: slippage,
+			slippageBps: slippage * 100,
 			forceFetch: true,
 		});
 
 		checkRoutesResponse(routes);
+
+		// choose first route
+		const route = await routes.routesInfos[0];
+
+		const routes2 = await jupiter.computeRoutes({
+			inputMint: new PublicKey(outputToken.address),
+			outputMint: new PublicKey(inputToken.address),
+			amount: route.outAmount,
+			slippageBps: slippage * 100,
+			forceFetch: true,
+		});
+
+		checkRoutesResponse(routes2);
+
+		// choose first route
+		route2 = routes2.routesInfos[0];
+			// count available routes
+		cache.availableRoutes[cache.sideBuy ? "buy" : "sell"] =
+		routes.routesInfos.length + routes2.routesInfos.length;
 
 		// count available routes
 		cache.availableRoutes[cache.sideBuy ? "buy" : "sell"] =
@@ -66,9 +85,6 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 
 		const performanceOfRouteComp =
 			performance.now() - performanceOfRouteCompStart;
-
-		// choose first route
-		const route = await routes.routesInfos[0];
 
 		// update slippage with "profit or kill" slippage
 		if (cache.config.slippage === "profitOrKill") {
@@ -147,7 +163,7 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 					}
 				}, 500);
 
-				[tx, performanceOfTx] = await swap(jupiter, route);
+				[tx, performanceOfTx] = await swap(jupiter, route, route2, tokenA, tokenB);
 
 				// stop refreshing status
 				clearInterval(printTxStatus);
