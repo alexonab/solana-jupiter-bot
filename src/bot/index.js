@@ -200,8 +200,8 @@ const pingpongStrategy = async (jupiter, tokenA, tokenB) => {
 				// change side
 				cache.sideBuy = !cache.sideBuy;
 			}
-			cache.swappingRightNow = false;
 		}
+		cache.swappingRightNow = false;
 		
 		printToConsole({
 			date,
